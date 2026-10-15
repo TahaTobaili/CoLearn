@@ -1,12 +1,584 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CoLearn — Socratic AI for Higher Education</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    body, html { margin: 0; height: 100%; }
-    iframe { width: 100%; height: 100vh; border: none; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #F7F8FC;
+      --white:       #FFFFFF;
+      --text:        #0F1629;
+      --muted:       #5A6880;
+      --brand:       #2D47E0;
+      --brand-faint: #EEF1FF;
+      --border:      #DDE2F0;
+      --dark:        #0F1629;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* NAV */
+    nav {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.375rem;
+      color: var(--brand);
+      letter-spacing: -0.02em;
+    }
+    .nav-link { font-size: 0.875rem; color: var(--muted); text-decoration: none; }
+    .nav-link:hover { color: var(--brand); }
+
+    /* HERO */
+    .hero-wrap { background: var(--white); border-bottom: 1px solid var(--border); }
+    .hero {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 6rem 2rem 5.5rem;
+      text-align: center;
+    }
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      color: var(--text);
+      margin-bottom: 1.5rem;
+    }
+    .hero p {
+      font-size: 1.0625rem;
+      color: var(--muted);
+      max-width: 560px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.75;
+    }
+    .cta-row { display: flex; gap: 0.875rem; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      display: inline-block;
+      padding: 0.8125rem 1.875rem;
+      border-radius: 5px;
+      font-size: 0.9375rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+    .btn-fill { background: var(--brand); color: #fff; }
+    .btn-fill:hover { background: #1E35C8; }
+    .btn-outline { background: var(--brand-faint); color: var(--brand); }
+    .btn-outline:hover { background: #DDE5FF; }
+
+    /* SHARED */
+    .wrap { max-width: 860px; margin: 0 auto; padding: 5rem 2rem; }
+    .alt { background: var(--white); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.625rem, 3.5vw, 2.25rem);
+      letter-spacing: -0.025em;
+      line-height: 1.2;
+      margin-bottom: 1.25rem;
+    }
+    .lede { font-size: 1rem; color: var(--muted); line-height: 1.75; margin-bottom: 1rem; }
+    .badge {
+      display: inline-block;
+      background: var(--brand-faint);
+      color: var(--brand);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      padding: 0.25rem 0.75rem;
+      border-radius: 4px;
+      margin-bottom: 1.25rem;
+    }
+
+    /* THREE PROBLEMS */
+    .problems {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2.5rem;
+      margin-top: 3rem;
+    }
+    .problem-item {}
+    .problem-name {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+    .problem-body {
+      font-size: 0.875rem;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+    .problem-cite {
+      font-size: 0.75rem;
+      color: var(--border);
+      margin-top: 0.5rem;
+    }
+
+    /* 6-STEP CYCLE */
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      margin-top: 2.5rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .step {
+      padding: 1.75rem;
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+    .step:nth-child(3n) { border-right: none; }
+    .step:nth-child(4),
+    .step:nth-child(5),
+    .step:nth-child(6) { border-bottom: none; }
+    .step-num {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--brand);
+      letter-spacing: 0.04em;
+      margin-bottom: 0.5rem;
+    }
+    .step h3 {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.4rem;
+    }
+    .step p {
+      font-size: 0.8125rem;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+    .step-highlight {
+      background: var(--brand-faint);
+    }
+    .step-highlight .step-num,
+    .step-highlight h3 { color: var(--brand); }
+
+    /* COMPETITIVE GAP */
+    .gap-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: 2.5rem;
+    }
+    .gap-row {
+      background: var(--white);
+      padding: 1.25rem 1.5rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      align-items: start;
+    }
+    .gap-row.header-row {
+      background: var(--bg);
+      padding: 0.75rem 1.5rem;
+    }
+    .gap-col-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .gap-category {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .gap-miss {
+      font-size: 0.875rem;
+      color: var(--muted);
+    }
+    .colearn-row {
+      background: var(--brand-faint);
+      padding: 1.25rem 1.5rem;
+      border-top: 2px solid var(--brand);
+    }
+    .colearn-row p {
+      font-size: 0.9375rem;
+      color: var(--brand);
+      font-weight: 500;
+    }
+    .colearn-row .colearn-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: var(--brand);
+      margin-bottom: 0.35rem;
+      text-transform: uppercase;
+    }
+
+    /* DEMO SECTION */
+    .dark-section { background: var(--dark); padding: 5rem 2rem; }
+    .dark-inner { max-width: 1100px; margin: 0 auto; }
+    .dark-section h2 { color: #fff; margin-bottom: 0.75rem; }
+    .dark-lede { font-size: 1rem; color: rgba(255,255,255,0.5); line-height: 1.75; margin-bottom: 2.5rem; max-width: 600px; }
+    .demo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: start; }
+    .demo-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.35);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+    .demo-pane img {
+      width: 100%;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.08);
+      display: block;
+    }
+    .demo-caption { font-size: 0.8125rem; color: rgba(255,255,255,0.35); margin-top: 0.75rem; line-height: 1.6; }
+
+    /* FOUNDER */
+    .founder-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; margin-top: 0.5rem; }
+    .pill-row { display: flex; flex-wrap: wrap; gap: 0.625rem; margin-top: 1.25rem; }
+    .pill {
+      font-size: 0.8125rem;
+      color: var(--muted);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 0.3rem 0.8rem;
+      border-radius: 100px;
+    }
+
+    /* FOOTER */
+    footer {
+      background: var(--text);
+      color: rgba(255,255,255,0.45);
+      text-align: center;
+      padding: 2.75rem 2rem;
+      font-size: 0.875rem;
+      line-height: 1.75;
+    }
+    footer a { color: rgba(255,255,255,0.7); text-decoration: none; }
+    footer a:hover { color: #fff; }
+
+    /* MOBILE */
+    @media (max-width: 680px) {
+      .hero { padding: 4rem 1.5rem 3.5rem; }
+      .wrap { padding: 3.5rem 1.5rem; }
+      .dark-section { padding: 3.5rem 1.5rem; }
+      .problems { grid-template-columns: 1fr; gap: 2rem; }
+      .steps { grid-template-columns: 1fr; }
+      .step { border-right: none !important; }
+      .step:last-child { border-bottom: none; }
+      .gap-grid { grid-template-columns: 1fr; }
+      .gap-row { grid-template-columns: 1fr; gap: 0.25rem; }
+      .demo-grid { grid-template-columns: 1fr; }
+      .founder-grid { grid-template-columns: 1fr; gap: 2rem; }
+    }
+
+    /* LIGHTBOX */
+    .demo-pane img { cursor: zoom-in; }
+    .lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.93);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      cursor: zoom-out;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox img {
+      max-width: 92vw;
+      max-height: 92vh;
+      object-fit: contain;
+      border-radius: 4px;
+      cursor: default;
+    }
+    .lightbox-close {
+      position: fixed;
+      top: 1.25rem;
+      right: 1.5rem;
+      color: rgba(255,255,255,0.55);
+      font-size: 2rem;
+      font-weight: 300;
+      cursor: pointer;
+      line-height: 1;
+      user-select: none;
+    }
+    .lightbox-close:hover { color: #fff; }
+    .lightbox-hint {
+      position: fixed;
+      bottom: 1.25rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.45);
+      pointer-events: none;
+      transition: opacity 0.2s;
+      white-space: nowrap;
+    }
   </style>
 </head>
 <body>
-  <iframe src="poster.pdf"></iframe>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">CoLearn</div>
+  <a href="mailto:taha.tobaili@gmail.com" class="nav-link">Get in touch</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero-wrap">
+  <div class="hero">
+    <h1>CoLearn redirects AI from replacing thinking to restoring it</h1>
+    <p>An AI-orchestrated learning space for higher education — built on Socratic guidance, peer explanation, and the science of how people actually learn.</p>
+    <div class="cta-row">
+      <a href="mailto:taha.tobaili@gmail.com" class="btn btn-fill">Request a pilot</a>
+      <a href="#experience" class="btn btn-outline">See how it works</a>
+    </div>
+  </div>
+</div>
+
+<!-- PROBLEM -->
+<div class="alt">
+  <div class="wrap">
+    <h2>AI makes answers easy, but learning shallow</h2>
+    <p class="lede" style="max-width:640px;">Three failure modes are emerging as students adopt AI tools for study — and none of the existing platforms are designed to address them.</p>
+
+    <div class="problems">
+      <div class="problem-item">
+        <div class="problem-name">Cognitive Dependency</div>
+        <p class="problem-body">Regular AI use weakens students' ability to plan, monitor and evaluate their own thinking — metacognitive skills that may not return when AI is removed.</p>
+        <p class="problem-cite">Bastani et al., 2024 &nbsp;&middot;&nbsp; Fan et al., 2025</p>
+      </div>
+      <div class="problem-item">
+        <div class="problem-name">AI-Driven Isolation</div>
+        <p class="problem-body">Students increasingly study alone with AI, losing the peer accountability, explanation, and learning-by-teaching that consolidate real understanding.</p>
+        <p class="problem-cite">Yan et al., 2024</p>
+      </div>
+      <div class="problem-item">
+        <div class="problem-name">Shallow Learning</div>
+        <p class="problem-body">Students bypass productive struggle and accept quick AI answers without reasoning through problems — the precise cognitive work that builds durable knowledge.</p>
+        <p class="problem-cite">Du et al., 2025 &nbsp;&middot;&nbsp; Kapur, 2014</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 6-STEP EXPERIENCE -->
+<div class="wrap" id="experience">
+  <h2>The CoLearn experience</h2>
+  <p class="lede" style="max-width:640px;">One AI engine orchestrating six steps that work together. Each step targets one of the failure modes above.</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <h3>Course Alignment</h3>
+      <p>Instructor grounds CoLearn in course materials, topics, and learning goals so every challenge is curriculum-relevant.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <h3>Generate Problems</h3>
+      <p>AI generates course-based challenges that require reading, reasoning, and problem solving — no copy-paste answers.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <h3>Learn Backwards</h3>
+      <p>Students work from the challenge back into the concepts they need — the opposite of passive reading.</p>
+    </div>
+    <div class="step step-highlight">
+      <div class="step-num">04</div>
+      <h3>Socratic AI</h3>
+      <p>Students attempt first. The AI guides with questions, staged hints, and redirects — without giving full solutions.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">05</div>
+      <h3>Peer Explanation</h3>
+      <p>Students explain their solution to a peer and review another's reasoning. Teaching consolidates what the AI session started.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">06</div>
+      <h3>Gamified Progression</h3>
+      <p>XP rewards solving, peer review, and helping others. Sprints and leaderboards keep progress visible and shared.</p>
+    </div>
+  </div>
+</div>
+
+<!-- COMPETITIVE GAP -->
+<div class="alt">
+  <div class="wrap">
+    <h2>Existing tools each address one part of the loop</h2>
+    <p class="lede" style="max-width:640px;">The EdTech landscape has solved individual pieces well. No platform combines them in a single university-ready learning environment.</p>
+
+    <div class="gap-grid">
+      <div class="gap-row header-row">
+        <span class="gap-col-label">Category</span>
+        <span class="gap-col-label">What's missing</span>
+      </div>
+      <div class="gap-row">
+        <span class="gap-category">AI Tutors</span>
+        <span class="gap-miss">Solo experience, no peer learning, weak course grounding</span>
+      </div>
+      <div class="gap-row">
+        <span class="gap-category">Problem Platforms</span>
+        <span class="gap-miss">No Socratic guidance, no peer explanation</span>
+      </div>
+      <div class="gap-row">
+        <span class="gap-category">Peer Learning Schools</span>
+        <span class="gap-miss">In-person only, not built for institutions, hard to scale</span>
+      </div>
+      <div class="gap-row">
+        <span class="gap-category">Gamified Learning</span>
+        <span class="gap-miss">Solo and shallow — motivation without depth</span>
+      </div>
+      <div class="colearn-row">
+        <div class="colearn-label">CoLearn</div>
+        <p>AI-orchestrated problem solving, Socratic guidance, peer explanation, and gamified progression — in one learning space built for universities.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SEE IT WORKING -->
+<div class="dark-section">
+  <div class="dark-inner">
+    <h2>See it working</h2>
+    <p class="dark-lede">A student works through a real problem. The AI never gives the answer — it reads their reasoning, detects where they're stuck, and asks the question that moves them forward.</p>
+
+    <div class="demo-grid">
+      <div class="demo-pane">
+        <div class="demo-label">Student session</div>
+        <img src="assets/snippet-frontend.png" alt="CoLearn Socratic AI — student working through a problem with guided questions" loading="lazy">
+        <p class="demo-caption">The tutor classifies each student message as an attempt, a question, or a bypass — and personalises the next response accordingly.</p>
+      </div>
+      <div class="demo-pane">
+        <div class="demo-label">Under the hood</div>
+        <img src="assets/snippet-backend.png" alt="CoLearn backend — Controller diagnosis pipeline showing real-time reasoning analysis" loading="lazy">
+        <p class="demo-caption">A three-stage LLM pipeline diagnoses student thinking, compares attempts across turns, and maps learner state to a hint tier before responding.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOUNDER -->
+<div class="alt">
+  <div class="wrap">
+    <h2>A response to the over-reliance on generative AI in higher education</h2>
+    <div class="founder-grid">
+      <div>
+        <p class="lede" style="margin-bottom:0.75rem;">
+          CoLearn is founded by Taha Tobaili, a researcher and NLP engineer whose work on Socratic AI in higher education at Imperial College London became the foundation for this platform.
+        </p>
+        <p class="lede" style="margin-bottom:0;">
+          Before CoLearn, Taha built production NLP systems at Amazon Alexa and IBM Watson. He holds a PhD in NLP and Data Science.
+        </p>
+        <div class="pill-row">
+      
+        </div>
+      </div>
+      <div>
+        <p class="lede" style="margin-bottom:0.75rem;">
+          CoLearn is currently in early-stage development, building toward pilot programs with universities. The MVP covers AI-facilitated study rooms, Socratic tutoring on problem sets, and peer learning mechanics.
+        </p>
+        <p class="lede" style="margin-bottom:0;">
+          If you are a faculty member, department, or institution interested in piloting CoLearn, we would love to hear from you.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <p>CoLearn &mdash; Early stage. Seeking university pilot partners.</p>
+  <p style="margin-top:0.5rem;"><a href="mailto:taha.tobaili@gmail.com" class="nav-link">Get in touch!</a></p>
+</footer>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <span class="lightbox-close" id="lightbox-close">&times;</span>
+  <img id="lightbox-img" src="" alt="">
+  <span class="lightbox-hint" id="lightbox-hint">Scroll to zoom &nbsp;&middot;&nbsp; drag to pan &nbsp;&middot;&nbsp; double-click to reset</span>
+</div>
+
+<script>
+  const lb    = document.getElementById('lightbox');
+  const lbImg = document.getElementById('lightbox-img');
+  const lbHint = document.getElementById('lightbox-hint');
+
+  let scale = 1, tx = 0, ty = 0, dragging = false, ox = 0, oy = 0;
+
+  function applyTransform() {
+    lbImg.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
+    lbImg.style.cursor = scale > 1 ? (dragging ? 'grabbing' : 'grab') : 'default';
+    lbHint.style.opacity = scale > 1 ? '0' : '0.45';
+  }
+
+  function resetTransform() { scale = 1; tx = 0; ty = 0; applyTransform(); }
+
+  function openLb(src, alt) {
+    resetTransform();
+    lbImg.src = src;
+    lbImg.alt = alt;
+    lb.classList.add('open');
+  }
+
+  function closeLb() { lb.classList.remove('open'); resetTransform(); }
+
+  // Open from thumbnails
+  document.querySelectorAll('.demo-pane img').forEach(img => {
+    img.addEventListener('click', () => openLb(img.src, img.alt));
+  });
+
+  // Close
+  lb.addEventListener('click', closeLb);
+  document.getElementById('lightbox-close').addEventListener('click', closeLb);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLb(); });
+
+  // Stop click bubbling on image itself
+  lbImg.addEventListener('click', e => e.stopPropagation());
+
+  // Scroll to zoom
+  lbImg.addEventListener('wheel', e => {
+    e.preventDefault();
+    const delta = e.deltaY < 0 ? 0.15 : -0.15;
+    scale = Math.min(6, Math.max(1, scale + delta));
+    if (scale === 1) { tx = 0; ty = 0; }
+    applyTransform();
+  }, { passive: false });
+
+  // Drag to pan
+  lbImg.addEventListener('mousedown', e => {
+    if (scale > 1) { dragging = true; ox = e.clientX - tx; oy = e.clientY - ty; applyTransform(); }
+  });
+  document.addEventListener('mousemove', e => {
+    if (dragging) { tx = e.clientX - ox; ty = e.clientY - oy; applyTransform(); }
+  });
+  document.addEventListener('mouseup', () => { dragging = false; applyTransform(); });
+
+  // Double-click to reset
+  lbImg.addEventListener('dblclick', e => { e.stopPropagation(); resetTransform(); });
+</script>
+
 </body>
 </html>
